@@ -1,0 +1,77 @@
+name: Node.js CI
+on:
+  pull_request:
+    types: [ opened, synchronize, ready_for_review, reopened ]
+jobs:
+  container-job:
+    environment: ci
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    container: node:20-bullseye-slim
+    services:
+      postgres:
+        image: postgres:14.3-alpine
+        env:
+          POSTGRES_DB: api_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      APP_NAME: api-api
+      APP_SERVICE_NAME: api-api
+      JWTKEY: $secretkeyjwt
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/api_test
+      LOG_LEVEL: http
+      TOKEN_EXPIRATION: 48h
+      COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+      COGNITO_APP_CLIENT_ID: ${{ secrets.COGNITO_APP_CLIENT_ID }}
+      COGNITO_APP_CLIENT_SECRET: ${{ secrets.COGNITO_APP_CLIENT_SECRET }}
+      COGNITO_APP_URL_AUTHORITY: ${{ secrets.COGNITO_APP_URL_AUTHORITY }}
+
+    steps:
+      - name: Create .env.test.local file
+        run: |
+          echo "COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }}" >> .env.test.local
+          echo "COGNITO_APP_CLIENT_ID=${{ secrets.COGNITO_APP_CLIENT_ID }}" >> .env.test.local
+          echo "COGNITO_APP_CLIENT_SECRET=${{ secrets.COGNITO_APP_CLIENT_SECRET }}" >> .env.test.local
+          echo "COGNITO_APP_URL_AUTHORITY=${{ secrets.COGNITO_APP_URL_AUTHORITY }}" >> .env.test.local
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create database
+        run: npm run db-create-ci
+
+      - name: Runs migrations
+        run: npm run migration:ci
+
+      - name: Runs fixtures
+        run: npm run db:fixtures-ci
+
+      - name: run integrations tests
+        run: npm run test-ci:integration
+
+      - name: run unit tests and coverage report
+        run: npm run test-ci:coverage
+
+      - name: Comment Coverage Report
+        if: github.ref != 'refs/heads/main'
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./coverage/lcov.info
+          filter-changed-files: true
+          delete-old-comments: true

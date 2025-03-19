@@ -1,0 +1,17 @@
+{
+  "^root(.*)$": "<rootDir>/src$1",
+  "^shared(.*)$": "<rootDir>/shared$1",
+  "^database(.*)$": "<rootDir>/database$1",
+  "^enumerates(.*)$": "<rootDir>/app/enum$1",
+  "^auth(.*)$": "<rootDir>/app/auth$1",
+  "^commons(.*)$": "<rootDir>/app/contexts/commons$1",
+  "^user(.*)$": "<rootDir>/app/contexts/user$1",
+  "^person(.*)$": "<rootDir>/app/contexts/person$1",
+  "^company(.*)$": "<rootDir>/app/contexts/company$1",
+  "^event-type(.*)$": "<rootDir>/app/contexts/event-type$1",
+  "^plan(.*)$": "<rootDir>/app/contexts/plan$1",
+  "^occupation(.*)$": "<rootDir>/app/contexts/occupation$1",
+  "^activity(.*)$": "<rootDir>/app/contexts/activity$1",
+  "^contract(.*)$": "<rootDir>/app/contexts/contract$1",
+  "^customer(.*)$": "<rootDir>/app/contexts/customer$1"
+}

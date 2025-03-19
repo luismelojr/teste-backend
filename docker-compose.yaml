@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17.0-alpine3.20
+    environment:
+      - POSTGRES_DB=api_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - api_nest
+
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=teste
+      - AWS_SECRET_ACCESS_KEY=teste
+    volumes:
+      - "./localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - api_nest
+
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    command: postgres:5432
+    depends_on:
+      - postgres
+      - localstack
+    networks:
+      - api_nest
+
+volumes:
+  db:
+    driver: local
+networks:
+  api_nest:
+    name: api_nest
+    driver: bridge

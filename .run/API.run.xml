@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="API" type="NodeJSConfigurationType" node-parameters="-r ts-node/register -r tsconfig-paths/register" path-to-js-file="src/main.ts" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="NODE_ENV" value="development" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>
